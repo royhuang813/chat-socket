@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>chat</title>
+  <style>
+    * {
+      padding: 0;
+      margin: 0;
+      box-sizing: border-box;
+    }
+
+    .container {
+      position: relative;
+      width: 500px;
+      height: 500px;
+      border: 1px solid red;
+    }
+
+    .content {
+      display: flex;
+      flex-direction: column;
+      height: calc(100% - 70px);
+      background-color: antiquewhite;
+      overflow-y: auto;
+      word-break: break-all;
+    }
+
+    .item {
+      padding: 10px;
+      margin: 10px;
+      width: auto;
+      border-radius: 10px;
+      background-color: #fff;
+    }
+
+    .myself {
+      align-self: flex-end;
+      background-color: turquoise;
+      border-top-right-radius: 0;
+      border-bottom-right-radius: 0;
+    }
+
+    .other {
+      align-self: flex-start;
+      border-top-left-radius: 0;
+      border-bottom-left-radius: 0;
+    }
+
+    .operate {
+      position: absolute;
+      bottom: 0;
+      display: flex;
+      justify-content: space-around;
+      padding: 10px;
+      width: 100%;
+      height: 70px;
+      background-color: mediumaquamarine;
+    }
+
+    #msg {
+      width: 400px;
+      height: 50px;
+      font-size: 20px;
+      resize: none;
+    }
+
+    #btn {
+      padding: 10px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="content">
+      <!-- <span class="myself item">123</span>
+      <span class="other item">456456</span>
+      <span class="other item">45446546</span>
+      <span class="other item">456sd</span>
+      <span class="other item">456ddsdasdsad</span>
+      <span class="myself item">123</span>
+      <span class="other item">4536</span>
+      <span class="other item">4536465480</span> -->
+    </div>
+    <div class="operate">
+      <textarea id="msg" type="text"></textarea>
+      <button id="btn">submit</button>
+    </div>
+  </div>
+  <script src="https://cdn.socket.io/4.3.2/socket.io.min.js"
+    integrity="sha384-KAZ4DtjNhLChOB/hxXuKqhMLYvx3b5MlT55xPEiNmREKRzeEm+RVPlTnAn0ajQNs"
+    crossorigin="anonymous"></script>
+  <script>
+    const socket = io('http://localhost:3456/')
+    socket.on('connect', () => {
+      console.log('socket', socket.id)
+    })
+
+    // socket.emit('msg', '你好服务器')
+
+    socket.on('msg', data => {
+      console.log('xxx', data)
+      document.getElementsByClassName('content')[0].innerHTML += `<span class="other item">${data}</span>`
+      scrollBottom()
+    })
+
+    function scrollBottom() {
+      const content = document.getElementsByClassName('content')[0]
+      content.scrollTop = content.scrollHeight
+    }
+
+    document.getElementById('msg').onkeydown = function (e) {
+      if (e.key.toLocaleLowerCase() === 'enter' || e.keyCode === 13) {
+        submit()
+      }
+    }
+    document.getElementById('btn').onclick = function (e) {
+      submit()
+    }
+
+    function submit() {
+      const input = document.getElementById('msg')
+      if (input.value.trim()) {
+        document.getElementsByClassName('content')[0].innerHTML += `<span class="myself item">${input.value}</span>`
+        socket.emit('msg', input.value)
+        input.value = ''
+        scrollBottom()
+      } else {
+        console.error('请输入内容后再提交')
+      }
+    }
+  </script>
+
+</body>
+
+</html>
